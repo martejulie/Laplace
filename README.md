@@ -10,6 +10,6 @@ The project is not an exact reproduction of the all the code I have used, but se
 as example.
 
 #### Contributors
-`makeColorMap` + `interpMap` is provided by Doug Hull, download it [here](http://www.mathworks.com/matlabcentral/fileexchange/17552-makecolormap)
+`makeColorMap` + `interpMap` is provided by Doug Hull, look [here](http://www.mathworks.com/matlabcentral/fileexchange/17552-makecolormap)
 
-`NegativeEnhancingColormap` is provided by Alejandro Cámara [@SoyYuma](https://github.com/SoyYuma), download it [here](http://acamara.es/blog/2013/01/negative-enhancing-colormap-for-matlab/)
+`NegativeEnhancingColormap` is provided by Alejandro Cámara [@SoyYuma](https://github.com/SoyYuma), look [here](http://acamara.es/blog/2013/01/negative-enhancing-colormap-for-matlab/)
