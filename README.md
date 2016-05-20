@@ -1,8 +1,9 @@
 # Laplace
 
 This project is part of the Master's degree thesis 
-"Estimation of oxygen consumption
-from partial pressure gradients in cortex", written by Marte Julie Sætra, May 2016.
+["Estimation of oxygen consumption
+from partial pressure gradients in cortex"](https://github.com/martejulie/master-thesis),
+written by Marte Julie Sætra, May 2016.
 It illustrates the use of the Laplace method, described and explored in Chapter 
 2, 6 and 7. Details on smoothing is given in Chapter 3.
 
