@@ -1,4 +1,4 @@
-function [ P, Hx, Hy, d ] = generatePmatrix( po2_data )
+function [ P, Hx, Hy, d ] = generatePmatrix( po2_data, pixels_per_100u )
 % Generates a pO2 grid from experimental data
 % Arg:
 %   po2_data (matrix): x values, y values, pO2 values
@@ -10,8 +10,8 @@ function [ P, Hx, Hy, d ] = generatePmatrix( po2_data )
 %   d (double): spatial spacing
 
 % extract data
-xvec = po2_data(:,1); 
-yvec = po2_data(:,2); 
+xvec = po2_data(:,1)*100/pixels_per_100u; 
+yvec = po2_data(:,2)*100/pixels_per_100u; 
 pO2vec = po2_data(:,3);
 
 % extract spatial grid

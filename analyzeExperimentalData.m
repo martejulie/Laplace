@@ -15,16 +15,17 @@ close all
 dataset = 5;
 load(['/home/martejulie/master_project_data/dataset', num2str(dataset),'/po2_data.mat']);
 load(['/home/martejulie/master_project_data/dataset', num2str(dataset),'/dist_2_vessel.mat']);
+load(['/home/martejulie/master_project_data/dataset', num2str(dataset),'/scale_param.mat']);
 
 % create P matrix
-[P_original, Hx, Hy, d] = extractPO2matrix(po2_data);
+[P_original, Hx, Hy, d] = extractPO2matrix(po2_data, pixels_per_100u);
 xx = {Hy, Hx};
 % create R matrix
-r = extractRmatrix(Hx, Hy, d, vessel_coords);
+r = extractRmatrix(Hx, Hy, d, vessel_coords, pixels_per_100u);
 
 % Estimate M as a function of p_cutoff, for different smoothing factors 
 p_cutoff = 10:0.1:70;
-p_smooth = [0.9, 0.5, 0.1, 0.01, 0.005];
+p_smooth = [0.5, 0.1, 0.01, 0.001];
 M_vectors = {};
 for j = 1:length(p_smooth)
     % smooth P
@@ -40,11 +41,11 @@ for j = 1:length(p_smooth)
 end
 
 % Estimate M for different regions parted with respect to r
-p = 0.1;
+p = 0.01;
 P_smoothed = csaps(xx, P_original, p, xx);
 del2P = 4*del2(P_smoothed, d);
-r_low = 10:10:40;
-r_high = 30:10:60;
+r_low = 25:25:100;
+r_high = 50:25:150;
 MofR = estimateMforDifferentRegions(r, r_low, r_high, del2P);
 
 % Estimate M for different regions parted with respect to pO2
@@ -65,9 +66,9 @@ imagesc(P_original, [0, max(P_original(:))]);
 colormap(map);
 axis xy;
 colorbar;
-title(['\textbf{$\mathrm{pO_2}$ for dataset $', num2str(dataset),'$}'], 'Interpreter', 'latex');
-xlabel('$x$', 'Interpreter', 'latex');
-ylabel('$y$', 'Interpreter', 'latex');
+title(['\textbf{$\mathrm{pO_2}$ for Dataset $', num2str(dataset),'$}'], 'Interpreter', 'latex');
+xlabel(['$x\, [', num2str(d, '%.2f'), '\mu m$]' ], 'Interpreter', 'latex');
+ylabel(['$y\, [', num2str(d, '%.2f'), '\mu m$]' ], 'Interpreter', 'latex');
 set(gca, 'fontsize', 16)
 
 figure(2); 
@@ -75,9 +76,9 @@ fim = imagesc(P_smoothed, [0, max(P_smoothed(:))]);
 colormap(map);
 colorbar;
 axis xy;
-title(['\textbf{$\mathrm{pO_2}$ for dataset $', num2str(dataset), ', \,p = ', num2str(p), '$}'], 'Interpreter', 'latex');
-xlabel('$x$', 'Interpreter', 'latex');
-ylabel('$y$', 'Interpreter', 'latex');
+title(['\textbf{$\mathrm{pO_2}$ for Dataset $', num2str(dataset), ', \,p = ', num2str(p), '$}'], 'Interpreter', 'latex');
+xlabel(['$x\, [', num2str(d, '%.2f'), '\mu m$]' ], 'Interpreter', 'latex');
+ylabel(['$y\, [', num2str(d, '%.2f'), '\mu m$]' ], 'Interpreter', 'latex');
 set(gca, 'fontsize', 16)
 
 figure(3); 
@@ -86,8 +87,8 @@ colormap(NegativeEnhancingColormap(100, [min(del2P(:)) max(del2P(:))], [0 0 1], 
 colorbar;
 axis xy;
 title(['\textbf{$\nabla^2 \mathrm{pO_2} = M, \,p = ', num2str(p), '$}'], 'Interpreter', 'latex');
-xlabel('$x$', 'Interpreter', 'latex');
-ylabel('$y$', 'Interpreter', 'latex');
+xlabel(['$x\, [', num2str(d, '%.2f'), '\mu m$]' ], 'Interpreter', 'latex');
+ylabel(['$y\, [', num2str(d, '%.2f'), '\mu m$]' ], 'Interpreter', 'latex');
 set(gca, 'fontsize', 16)
 
 figure(4); 
@@ -107,29 +108,30 @@ for i = 1:length(M_vectors)
 end
 legend(legendInfo)
 grid minor
-title(['\textbf{$M\mathrm{_{est}}$ vs. $p\mathrm{_{cutoff}}$ for dataset $', num2str(dataset),'$}'], 'Interpreter', 'latex');
+title(['\textbf{$M\mathrm{_{est}}$ vs. $p\mathrm{_{cutoff}}$ for Dataset $', num2str(dataset),'$}'], 'Interpreter', 'latex');
 xlabel('$\mathrm{pO_2}$ [mmHg]', 'Interpreter', 'latex');
 ylabel('$M$ [mmHg/$\mu m$]', 'Interpreter', 'latex');
 set(gca, 'fontsize', 16)
-%axis([10 60 0 0.1])
 hold off
 
 figure(6);
 fig = imagesc(r_low, r_high, MofR, [0.0, 0.05]);
-set(gca, 'fontsize', 16, 'YTick', [30:10:60])
+set(gca, 'fontsize', 16, 'YTick', r_high)
 colormap(map);
-colorbar;
+h = colorbar;
+xlabel(h,'$M$ [mmHg/$\mu m^2$]', 'Interpreter', 'latex')
 axis xy;
 title(['\textbf{$M, \, p = ', num2str(p), '$}'], 'Interpreter', 'latex');
-xlabel('$r\mathrm{_{low}}$', 'Interpreter', 'latex');
-ylabel('$r\mathrm{_{high}}$', 'Interpreter', 'latex');
+xlabel('$r\mathrm{_{low}} [\mu m]$', 'Interpreter', 'latex');
+ylabel('$r\mathrm{_{high}} [\mu m]$', 'Interpreter', 'latex');
 
 figure(7);
 fig = imagesc(p_low, p_high, MofPO2, [0.0 0.05]);
-set(gca, 'fontsize', 16, 'XTick', [0,10], 'YTick', [10,20,30,40]);
+set(gca, 'fontsize', 16, 'XTick', p_low, 'YTick', p_high);
 colormap(map);
-colorbar;
+h = colorbar;
+xlabel(h,'$M$ [mmHg/$\mu m^2$]', 'Interpreter', 'latex')
 axis xy;
 title(['\textbf{$M, \, p = ', num2str(p), '$}'], 'Interpreter', 'latex');
-xlabel('$p\mathrm{_{low}}$', 'Interpreter', 'latex');
-ylabel('$p\mathrm{_{high}}$', 'Interpreter', 'latex');
+xlabel('$p\mathrm{_{low}}$ [mmHg]', 'Interpreter', 'latex');
+ylabel('$p\mathrm{_{high}}$ [mmHg]', 'Interpreter', 'latex');

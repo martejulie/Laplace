@@ -9,18 +9,19 @@ clear all
 close all
 
 % set parameters
-params = [80, 0.0065]; % po2 at the vessel wall, oxygen consumption M
+params = [80, 1.14e-3];; % po2 at the vessel wall, oxygen consumption M
 rves = 6.0; % vessel radius
-rt = 100.0; % tissue radius
+rt = 200.0; % tissue radius
 
 % load dataset 5
 load('/home/martejulie/master_project_data/dataset5/po2_data.mat');
 load('/home/martejulie/master_project_data/dataset5/dataStruct_delay15.mat');
 load('/home/martejulie/master_project_data/dataset5/dist_2_vessel.mat');
+load('/home/martejulie/master_project_data/dataset5/scale_param.mat');
 
 % extract data
-xvec = po2_data(:,1); 
-yvec = po2_data(:,2);
+xvec = po2_data(:,1)*100/pixels_per_100u; 
+yvec = po2_data(:,2)*100/pixels_per_100u;
 po2vec = po2_data(:,3);
 evec = dataStruct.pO2_std_err;
 
@@ -32,11 +33,11 @@ dx = (max(hx(:))- min(hx(:))) / (length(hx)-1);
 dy = (max(hy(:))- min(hy(:))) / (length(hy)-1);
 d = mean([dx, dy]);
 % create grid with uniform spatial spacing
-Hx = min(hx(:)):d:max(hx(:));       
-Hy = min(hy(:)):d:max(hy(:));
+Hx = min(hx(:)):d:ceil(max(hx(:))/d)*d;
+Hy = min(hy(:)):d:ceil(max(hy(:))/d)*d;
 [X, Y] = meshgrid(Hx, Hy);
 % calculate distance to vessel
-r = sqrt( (X - vessel_coords(1)).^2 + (Y - vessel_coords(2)).^2 );
+r = sqrt( (X - vessel_coords(1)*100/pixels_per_100u).^2 + (Y - vessel_coords(2)*100/pixels_per_100u).^2 );
 r(r < rves) = rves;
 % calculate pO2 values from the Standard Krogh Model
 P_ideal = params(1) + 0.25 * params(2) * (r.^2 - rves) - 0.5 * params(2) * rt.^2 * log(r ./ rves);
@@ -49,7 +50,7 @@ P_noisy = normrnd(P_ideal, mystd);
 
 % smooth with CSAPS
 xx = {Hy, Hx};
-p = 0.1;
+p = 0.01;
 P_smoothed = csaps(xx, P_noisy, p, xx);
 
 % calculate M
